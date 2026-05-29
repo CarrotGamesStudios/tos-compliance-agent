@@ -1,0 +1,60 @@
+{
+  "id": "privacy-core",
+  "domain": "privacy",
+  "provenance": "public",
+  "source_doc": "gdpr",
+  "source_version": "2026-05-28",
+  "compiled_at": "2026-05-28",
+  "obligations": [
+    {
+      "id": "priv-pii-in-logs",
+      "domain": "privacy",
+      "source": {
+        "doc": "GDPR",
+        "provenance": "public",
+        "version": "gdpr-art-5-1-f",
+        "clause_quote": "processed in a manner that ensures appropriate security of the personal data, including protection against unauthorised or unlawful processing ... using appropriate technical or organisational measures",
+        "url_or_section": "https://gdpr-info.eu/art-5-gdpr/ Art.5(1)(f)"
+      },
+      "applies_when": {"has_pii_in_logs": true},
+      "requirement": "Personal data must not be written to application logs; PII-named fields appearing in log/print calls are a security-of-processing risk.",
+      "check": {
+        "kind": "deterministic",
+        "analyzer": "pii_in_logs",
+        "params": {}
+      },
+      "severity": "high",
+      "fix": {
+        "kind": "manual",
+        "guidance": "Redact or omit the PII field before logging (log an id or a masked value instead)."
+      }
+    },
+    {
+      "id": "priv-deletion-path",
+      "domain": "privacy",
+      "source": {
+        "doc": "GDPR",
+        "provenance": "public",
+        "version": "gdpr-art-17",
+        "clause_quote": "The data subject shall have the right to obtain from the controller the erasure of personal data concerning him or her without undue delay",
+        "url_or_section": "https://gdpr-info.eu/art-17-gdpr/ Art.17(1)"
+      },
+      "applies_when": {
+        "any": [
+          {"has_pii_in_logs": true},
+          {"uses_import_in": ["django", "flask", "fastapi", "sqlalchemy", "sqlmodel", "psycopg2", "psycopg", "asyncpg", "pymongo", "mysqlclient", "peewee", "tortoise"]}
+        ]
+      },
+      "requirement": "A project that processes personal data must provide a path to erase a data subject's personal data on request.",
+      "check": {
+        "kind": "judgment",
+        "prompt_template": "Given that this project handles personal data, judge whether it appears to provide a data-deletion/erasure path. Flag a violation only if there is positive evidence that deletion is impossible or absent."
+      },
+      "severity": "medium",
+      "fix": {
+        "kind": "manual",
+        "guidance": "Implement and document a deletion path so erasure requests can be honored."
+      }
+    }
+  ]
+}

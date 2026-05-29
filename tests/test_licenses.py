@@ -90,6 +90,17 @@ def test_build_project_model_detects_notice_file(tmp_path):
     assert pm.notice_text == "attributions\n"
 
 
+def test_build_project_model_captures_code_facts(tmp_path):
+    (tmp_path / "pyproject.toml").write_text('[project]\nname="demo"\nlicense="MIT"\n')
+    (tmp_path / "app.py").write_text(
+        "import logging\nimport stripe\n"
+        "def f(email):\n    logging.info(email)\n"
+    )
+    pm = build_project_model(str(tmp_path), dist_lookup=FakeLookup({}))
+    assert "stripe" in pm.imports
+    assert len(pm.pii_log_sites) == 1 and "email" in pm.pii_log_sites[0].snippet
+
+
 def test_build_project_model_raises_on_missing_pyproject(tmp_path):
     import pytest
 

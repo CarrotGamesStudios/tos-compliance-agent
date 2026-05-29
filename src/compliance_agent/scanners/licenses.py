@@ -7,6 +7,7 @@ from pathlib import Path
 from ..errors import ProjectScanError
 from ..models import Dependency, ProjectModel
 from ..safety import resolve_root
+from .code_ast import scan_python_files
 from .pyproject import (
     _CLASSIFIER_TO_SPDX,
     normalize_license,
@@ -101,10 +102,16 @@ def build_project_model(project_dir: str, dist_lookup=None) -> ProjectModel:
 
     notice_text = _read_notice(root)
 
+    # Code-level facts (privacy / ai_aup / api_tos): PII-in-logs + imported modules.
+    pii_log_sites, imports, code_unscanned = scan_python_files(str(root))
+    unscanned.extend(code_unscanned)
+
     digest_input = "|".join(
         [project_license or ""]
         + sorted(f"{d.name}:{d.license}" for d in deps)
         + [str(notice_text is not None)]
+        + sorted(f"{e.file}:{e.line}:{e.snippet}" for e in pii_log_sites)
+        + sorted(imports)
     )
     model_hash = hashlib.sha256(digest_input.encode()).hexdigest()[:16]
 
@@ -115,5 +122,7 @@ def build_project_model(project_dir: str, dist_lookup=None) -> ProjectModel:
         dependencies=deps,
         notice_file_present=notice_text is not None,
         notice_text=notice_text,
+        pii_log_sites=pii_log_sites,
+        imports=imports,
         unscanned=unscanned,
     )

@@ -26,6 +26,19 @@ def test_load_bundled_license_pack_validates():
         assert o.source.url_or_section.strip()
 
 
+def test_all_bundled_packs_present_and_valid():
+    # load_bundled_packs validates every obligation's applies_when predicate on load.
+    ids = {p.id for p in load_bundled_packs()}
+    assert {"license-core", "privacy-core", "ai-aup-core", "api-tos-core"} <= ids
+
+
+def test_every_bundled_obligation_has_citation_and_domain_matches():
+    for pack in load_bundled_packs():
+        for o in pack.obligations:
+            assert o.source.clause_quote.strip() and o.source.url_or_section.strip()
+            assert o.domain == pack.domain
+
+
 def test_load_pack_from_path(tmp_path):
     data = {
         "id": "p1",

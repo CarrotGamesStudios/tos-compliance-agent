@@ -1,0 +1,58 @@
+{
+  "id": "ai-aup-core",
+  "domain": "ai_aup",
+  "provenance": "public",
+  "source_doc": "genai-prohibited-use-policy",
+  "source_version": "2026-05-28",
+  "compiled_at": "2026-05-28",
+  "obligations": [
+    {
+      "id": "aup-prohibited-use",
+      "domain": "ai_aup",
+      "source": {
+        "doc": "Generative AI Prohibited Use Policy",
+        "provenance": "public",
+        "version": "genai-aup-prohibited",
+        "clause_quote": "You may not use the Services to perform or facilitate dangerous, illegal, or malicious activities",
+        "url_or_section": "https://policies.google.com/terms/generative-ai/use-policy"
+      },
+      "applies_when": {
+        "uses_import_in": ["openai", "anthropic", "google", "vertexai", "genai", "transformers", "cohere"]
+      },
+      "requirement": "Use of a generative AI model must comply with the provider's acceptable-use policy (no prohibited/dangerous use cases).",
+      "check": {
+        "kind": "judgment",
+        "prompt_template": "This project calls a generative AI SDK. Judge whether its use case appears to violate the provider's prohibited-use policy. Flag a violation only with positive evidence of a prohibited use case."
+      },
+      "severity": "high",
+      "fix": {
+        "kind": "manual",
+        "guidance": "Remove or gate the prohibited use case; review the provider's acceptable-use policy."
+      }
+    },
+    {
+      "id": "aup-ai-disclosure",
+      "domain": "ai_aup",
+      "source": {
+        "doc": "Generative AI Prohibited Use Policy",
+        "provenance": "public",
+        "version": "genai-aup-disclosure",
+        "clause_quote": "be transparent ... and disclose ... that content has been AI-generated where required",
+        "url_or_section": "https://policies.google.com/terms/generative-ai/use-policy"
+      },
+      "applies_when": {
+        "uses_import_in": ["openai", "anthropic", "google", "vertexai", "genai", "transformers", "cohere"]
+      },
+      "requirement": "AI-generated content must be disclosed to end users where the provider or law requires it.",
+      "check": {
+        "kind": "judgment",
+        "prompt_template": "Judge whether this project, which generates AI content, discloses that the content is AI-generated where required. Flag only with positive evidence that required disclosure is absent."
+      },
+      "severity": "low",
+      "fix": {
+        "kind": "manual",
+        "guidance": "Add an AI-generated-content disclosure to the relevant user-facing output."
+      }
+    }
+  ]
+}

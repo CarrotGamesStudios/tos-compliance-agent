@@ -76,3 +76,31 @@ def test_validate_accepts_well_formed_compound():
     validate_predicate(
         {"all": [{"dep_license_in": ["Apache-2.0"]}, {"not": {"has_dep_license": "MIT"}}]}
     )
+
+
+def test_code_fact_predicates():
+    from compliance_agent.models import Evidence
+
+    m = ProjectModel(
+        hash="h",
+        root="/p",
+        imports=["stripe", "requests"],
+        pii_log_sites=[Evidence(file="a.py", line=1, snippet="email")],
+    )
+    assert evaluate_predicate({"has_pii_in_logs": True}, m) is True
+    assert evaluate_predicate({"uses_import": "stripe"}, m) is True
+    assert evaluate_predicate({"uses_import": "openai"}, m) is False
+    assert evaluate_predicate({"uses_import_in": ["openai", "requests"]}, m) is True
+    # clean model
+    clean = ProjectModel(hash="h", root="/p")
+    assert evaluate_predicate({"has_pii_in_logs": True}, clean) is False
+
+
+def test_validate_new_ops():
+    validate_predicate({"has_pii_in_logs": True})
+    validate_predicate({"uses_import": "stripe"})
+    validate_predicate({"uses_import_in": ["a", "b"]})
+    with pytest.raises(ValueError):
+        validate_predicate({"uses_import": ["not-a-string"]})
+    with pytest.raises(ValueError):
+        validate_predicate({"has_pii_in_logs": "true"})

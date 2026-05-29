@@ -67,6 +67,9 @@ class ProjectModel(BaseModel):
     dependencies: list[Dependency] = Field(default_factory=list)
     notice_file_present: bool = False
     notice_text: str | None = None
+    # Code-level facts (populated by the Python AST scanner; used by privacy/ai_aup/api_tos).
+    pii_log_sites: list[Evidence] = Field(default_factory=list)
+    imports: list[str] = Field(default_factory=list)
     unscanned: list[dict[str, str]] = Field(default_factory=list)
 
 
@@ -91,3 +94,9 @@ class Baseline(BaseModel):
     project_model_hash: str
     policy_pack_versions: dict[str, str] = Field(default_factory=dict)
     findings: list[Finding] = Field(default_factory=list)
+
+
+# ProjectModel.pii_log_sites is typed list[Evidence], but Evidence is declared further down in
+# this module. Rebuild ProjectModel now that Evidence exists in the namespace so the forward
+# reference resolves.
+ProjectModel.model_rebuild()

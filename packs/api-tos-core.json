@@ -1,0 +1,32 @@
+{
+  "id": "api-tos-core",
+  "domain": "api_tos",
+  "provenance": "public",
+  "source_doc": "stripe-services-agreement",
+  "source_version": "2026-05-28",
+  "compiled_at": "2026-05-28",
+  "obligations": [
+    {
+      "id": "tos-card-data-storage",
+      "domain": "api_tos",
+      "source": {
+        "doc": "Stripe Services Agreement",
+        "provenance": "public",
+        "version": "stripe-ssa-card-data",
+        "clause_quote": "You must not store ... full magnetic stripe data, card validation codes (CVV2, CVC2, CID), or PIN data",
+        "url_or_section": "https://stripe.com/legal/ssa Card Data"
+      },
+      "applies_when": {"uses_import": "stripe"},
+      "requirement": "Projects integrating Stripe must not store prohibited cardholder data (full PAN magstripe, CVV, PIN).",
+      "check": {
+        "kind": "judgment",
+        "prompt_template": "This project imports the Stripe SDK. Judge whether it appears to store prohibited cardholder data (full magnetic-stripe data, CVV/CVC, or PINs). Flag a violation only with positive evidence of prohibited storage."
+      },
+      "severity": "critical",
+      "fix": {
+        "kind": "manual",
+        "guidance": "Never persist CVV/PIN/full magstripe data; use Stripe tokens/PaymentMethods instead."
+      }
+    }
+  ]
+}
