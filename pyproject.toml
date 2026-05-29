@@ -18,6 +18,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
+# Ingest B2B contracts / policies distributed as PDF (MSAs, DPAs, SOWs).
+pdf = ["pypdf>=4.0"]
 # Tier-1 hosted/agent stack (the user installs this into their OWN GCP project).
 gcp = [
     "google-genai>=1.0",

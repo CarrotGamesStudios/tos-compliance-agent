@@ -28,6 +28,18 @@ def test_local_source_store_reads_manifest_and_files(tmp_path):
     assert docs[0].domain == "license"
 
 
+def test_local_source_store_loads_contract_domain(tmp_path):
+    (tmp_path / "dpa.txt").write_text("Sub-processors must be authorized in writing.")
+    (tmp_path / "sources.json").write_text(
+        json.dumps(
+            [{"id": "acme-dpa", "domain": "contract", "file": "dpa.txt", "provenance": "internal"}]
+        )
+    )
+    docs = LocalSourceStore(str(tmp_path)).list_documents()
+    assert docs[0].domain == "contract" and docs[0].provenance == "internal"
+    assert "Sub-processors" in docs[0].text
+
+
 def test_local_source_store_missing_manifest_raises(tmp_path):
     with pytest.raises(ProjectScanError):
         LocalSourceStore(str(tmp_path)).list_documents()

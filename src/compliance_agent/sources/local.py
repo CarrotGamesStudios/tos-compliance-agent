@@ -5,6 +5,7 @@ from pathlib import Path
 
 from ..errors import ProjectScanError
 from .base import SourceDoc
+from .extract import extract_text
 
 # A local source store reads a `sources.json` manifest plus the referenced text files:
 #   [{"id": "gpl-3.0", "domain": "license", "file": "gpl-3.0.txt",
@@ -36,7 +37,7 @@ class LocalSourceStore:
                     SourceDoc(
                         id=entry["id"],
                         domain=entry["domain"],
-                        text=file_path.read_text(encoding="utf-8"),
+                        text=extract_text(entry["file"], file_path.read_bytes()),
                         url_base=entry.get("url_base", ""),
                         provenance=entry.get("provenance", "public"),
                     )

@@ -12,5 +12,12 @@
     "file": "internal-data-policy.txt",
     "url_base": "internal://data-policy",
     "provenance": "internal"
+  },
+  {
+    "id": "example-dpa",
+    "domain": "contract",
+    "file": "example-dpa.txt",
+    "url_base": "internal://contracts/acme-dpa",
+    "provenance": "internal"
   }
 ]

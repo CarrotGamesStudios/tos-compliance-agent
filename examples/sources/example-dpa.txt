@@ -1,0 +1,11 @@
+ACME Corp — Data Processing Addendum (example / fictional), Section 6: Sub-processors & Residency.
+
+6.1 The Processor shall not engage any sub-processor to process Customer Personal Data without the
+Controller's prior written authorization.
+
+6.2 The Processor shall process and store Customer Personal Data only within the European Economic
+Area. Transfer of Customer Personal Data outside the EEA is prohibited absent an approved transfer
+mechanism.
+
+6.3 Upon termination, the Processor shall delete or return all Customer Personal Data within 30 days
+and certify such deletion in writing.

@@ -4,6 +4,7 @@ import json
 
 from ..errors import ProjectScanError
 from .base import SourceDoc
+from .extract import extract_text
 
 
 class GcsSourceStore:
@@ -44,7 +45,7 @@ class GcsSourceStore:
             try:
                 file_name = entry["file"]
                 blob = bucket.blob(f"{self.prefix}{file_name}")
-                text = blob.download_as_text()
+                text = extract_text(file_name, blob.download_as_bytes())
                 docs.append(
                     SourceDoc(
                         id=entry["id"],
