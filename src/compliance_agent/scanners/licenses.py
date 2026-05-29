@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.metadata
+import sys
 from pathlib import Path
 
 from ..errors import ProjectScanError
@@ -69,13 +70,30 @@ def _read_notice(root: Path) -> str | None:
     return None
 
 
-def build_project_model(project_dir: str, dist_lookup=None) -> ProjectModel:
-    lookup = dist_lookup if dist_lookup is not None else _ImportlibLookup()
+def build_project_model(project_dir: str, dist_lookup=None, pkg_lookup=None) -> ProjectModel:
+    """Build a ProjectModel, dispatching by ecosystem: Python (pyproject.toml) or Node
+    (package.json). dist_lookup is the Python dependency-license seam; pkg_lookup the Node one."""
     root = resolve_root(project_dir)
+    has_py = (root / "pyproject.toml").is_file()
+    has_node = (root / "package.json").is_file()
+    if has_py and has_node:
+        print(
+            f"warning: {root} has both pyproject.toml and package.json; scanning the Python "
+            "project (scan the Node subdir explicitly to check it too)",
+            file=sys.stderr,
+        )
+    if has_py:
+        return _build_python_model(root, dist_lookup)
+    if has_node:
+        from .node import build_node_model
 
+        return build_node_model(str(root), pkg_lookup=pkg_lookup)
+    raise ProjectScanError(f"no pyproject.toml or package.json found in {root}")
+
+
+def _build_python_model(root, dist_lookup=None) -> ProjectModel:
+    lookup = dist_lookup if dist_lookup is not None else _ImportlibLookup()
     pyproject = root / "pyproject.toml"
-    if not pyproject.is_file():
-        raise ProjectScanError(f"no pyproject.toml found in {root}")
     try:
         pyproject_text = pyproject.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:  # pragma: no cover - defensive

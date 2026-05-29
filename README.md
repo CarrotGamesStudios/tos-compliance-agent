@@ -67,10 +67,17 @@ compliance-agent refresh --gcs-bucket YOUR_BUCKET --packs ./packs --project YOUR
 
 ## Status
 
-Tier-0 (local CLI + MCP, OSS-license domain) and Tier-1 (hosted compiler / agent / deploy) are
-implemented and tested (120+ tests, both external review gates passing). Public domains beyond
-license (AI-AUP, privacy, API-ToS), internal/B2B sourcing, and a Node/TS scanner are on the roadmap
-(spec §9).
+Implemented and tested (150+ tests, ruff-clean, dual external review gates):
+
+- **Tier-0** — local CLI + MCP server.
+- **Tier-1** — Gemini compiler, upstream-drift `refresh`, ADK agent, Terraform + Dockerfile deploy.
+- **Domains** — `license` (deterministic), `privacy` (PII-in-logs deterministic + GDPR judgment),
+  `ai_aup` and `api_tos` (judgment via the Gemini judge), plus `internal_policy` / `contract` for
+  your own policies and B2B contracts (PDF ingestion supported).
+- **Ecosystems** — Python (pyproject + installed-dist metadata) and **Node/TS** (package.json +
+  node_modules licenses + JS/TS PII-in-logs). The scanner auto-detects which.
+
+CI runs lint + tests + a self-scan on every push (`.github/workflows/ci.yml`).
 
 - Design spec: [`docs/superpowers/specs/2026-05-28-tos-compliance-agent-design.md`](docs/superpowers/specs/2026-05-28-tos-compliance-agent-design.md)
 - Tier-0 plan: [`docs/superpowers/plans/2026-05-28-tier0-license-python-skeleton.md`](docs/superpowers/plans/2026-05-28-tier0-license-python-skeleton.md)
