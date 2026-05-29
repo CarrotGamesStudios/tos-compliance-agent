@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from ._common import SKIP_DIRS as _SKIP_DIRS
+
 # Detect use of a social-platform API by its distinctive API host/path appearing in source.
 # Keyed to API endpoints (not generic domains like youtube.com) for precision — a reference to
 # these strongly implies the project integrates that platform's API and is bound by its ToS.
@@ -23,10 +25,6 @@ _SCAN_EXTS = {
 def _is_scannable(filename: str) -> bool:
     # Match by extension, plus dotenv files (.env, .env.local, ...) whose ".env" is not a suffix.
     return Path(filename).suffix in _SCAN_EXTS or filename.startswith(".env")
-_SKIP_DIRS = {
-    "node_modules", ".git", ".next", "dist", "build", ".venv", "venv", "__pycache__",
-    "coverage", ".mypy_cache", ".pytest_cache", ".ruff_cache", "out", ".turbo",
-}
 _MAX_FILE_BYTES = 2_000_000  # skip very large files (lockfiles, bundles)
 
 

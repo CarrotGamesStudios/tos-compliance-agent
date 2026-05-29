@@ -6,12 +6,7 @@ import re
 from pathlib import Path
 
 from ..models import Evidence
-
-# Directories we never descend into when walking a project for .py files.
-_SKIP_DIRS = {
-    ".venv", "venv", "env", ".git", "__pycache__", "node_modules", "build", "dist",
-    ".tox", ".mypy_cache", ".pytest_cache", ".ruff_cache", ".eggs",
-}
+from ._common import SKIP_DIRS as _SKIP_DIRS
 
 # Logging-ish call targets: a call is "a log call" if it is `print(...)` or an attribute call
 # whose final attribute is one of these verbs (logger.info, logging.error, self.log.debug, ...).

@@ -9,12 +9,12 @@ from pathlib import Path
 from ..errors import ProjectScanError
 from ..models import Dependency, Evidence, ProjectModel
 from ..safety import ensure_within
+from ._common import SKIP_DIRS as _SKIP_DIRS
 from .code_ast import identifier_pii_hit
 from .platforms import detect_platform_apis
 from .pyproject import normalize_license
 
 _NOTICE_FILES = ("NOTICE", "NOTICE.txt", "NOTICE.md")
-_SKIP_DIRS = {"node_modules", ".git", "dist", "build", ".next", "coverage", ".venv", "out"}
 _SOURCE_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
 
 # Heuristic: opener of a `<receiver>.<verb>(` log call (any receiver, so winston/pino/custom
