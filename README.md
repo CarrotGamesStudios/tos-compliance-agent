@@ -33,12 +33,47 @@ reserved for deterministic findings; LLM-proposed fixes always surface for human
 - **MCP server** so AI coding assistants (Claude Code, Cursor, Gemini CLI) can call it inline.
 - **Local CLI** (`compliance-agent scan|fix`) for fast, cloud-optional use.
 
+## Quickstart (Tier-0, local — no Google Cloud needed)
+
+```bash
+pip install -e ".[dev]"            # Python 3.11+
+
+compliance-agent scan  /path/to/python-project     # report license findings (cited)
+compliance-agent fix   /path/to/python-project --apply   # auto-fix (e.g. generate NOTICE)
+
+# MCP server for AI coding assistants (Claude Code / Cursor / Gemini CLI):
+python -m compliance_agent.mcp_server              # stdio; tools: scan_project, explain_obligation,
+                                                   # list_policy_packs, apply_fix
+```
+
+What Tier-0 checks today: **GPL/AGPL incompatibility** (flagged, cited to GPL-3.0 §5-6) and
+**missing Apache-2.0 NOTICE attributions** (auto-fixed). Every finding cites the exact source
+clause; auto-fix is reserved for deterministic findings and never runs without `--apply`.
+
+## Tier-1 (self-hosted on your own GCP project)
+
+Adds a Gemini-backed **compiler** (source docs → versioned Policy Packs with mandatory clause
+verification), **upstream-drift** detection (`refresh` recompiles only changed docs), an **ADK
+agent** for Vertex AI Agent Engine, and a Terraform module + Dockerfile. See
+[`deploy/README.md`](deploy/README.md):
+
+```bash
+pip install "compliance-agent[gcp]"
+compliance-agent init --project YOUR_PROJECT --bucket YOUR_BUCKET --apply   # provision (Terraform)
+compliance-agent refresh --gcs-bucket YOUR_BUCKET --packs ./packs --project YOUR_PROJECT
+```
+
+`examples/sources/` contains a runnable `sources.json` + sample docs to try `refresh` against.
+
 ## Status
 
-Early development. See the design spec and phased implementation plans:
+Tier-0 (local CLI + MCP, OSS-license domain) and Tier-1 (hosted compiler / agent / deploy) are
+implemented and tested (120+ tests, both external review gates passing). Public domains beyond
+license (AI-AUP, privacy, API-ToS), internal/B2B sourcing, and a Node/TS scanner are on the roadmap
+(spec §9).
 
 - Design spec: [`docs/superpowers/specs/2026-05-28-tos-compliance-agent-design.md`](docs/superpowers/specs/2026-05-28-tos-compliance-agent-design.md)
-- Plan 1 (Tier-0 skeleton — OSS license × Python): [`docs/superpowers/plans/2026-05-28-tier0-license-python-skeleton.md`](docs/superpowers/plans/2026-05-28-tier0-license-python-skeleton.md)
+- Tier-0 plan: [`docs/superpowers/plans/2026-05-28-tier0-license-python-skeleton.md`](docs/superpowers/plans/2026-05-28-tier0-license-python-skeleton.md)
 
 ## License
 

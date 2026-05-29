@@ -1,0 +1,16 @@
+[
+  {
+    "id": "apache-2.0",
+    "domain": "license",
+    "file": "apache-2.0-excerpt.txt",
+    "url_base": "https://www.apache.org/licenses/LICENSE-2.0",
+    "provenance": "public"
+  },
+  {
+    "id": "example-internal-data-policy",
+    "domain": "internal_policy",
+    "file": "internal-data-policy.txt",
+    "url_base": "internal://data-policy",
+    "provenance": "internal"
+  }
+]

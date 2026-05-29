@@ -1,0 +1,10 @@
+ACME Corp — Internal Data Handling Policy (example / fictional), Section 3: Engineering Controls.
+
+3.1 Personal data must never be written to application logs. Engineers must redact or omit any
+field classified as PII before it reaches a log sink.
+
+3.2 Customer data must be stored only in approved regions (us-central1, europe-west1). Storing
+customer data in any other region is prohibited without a signed data-residency exception.
+
+3.3 Every service that processes customer data must expose a documented deletion path so that a
+customer deletion request can be fully honored within 30 days.
