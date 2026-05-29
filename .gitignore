@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Compliance agent local state (Tier-0) and private/internal packs (never committed)
+.compliance/
+packs/internal/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Secrets / credentials (never commit)
+*.env
+.env
+*.json.key
+service-account*.json
