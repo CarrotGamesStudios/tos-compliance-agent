@@ -3,7 +3,9 @@ from __future__ import annotations
 import re
 
 # Match attribution entries of the form "- <name> (<license>)" — the format we generate.
-_ENTRY_RE = re.compile(r"^\s*-\s*([A-Za-z0-9][A-Za-z0-9._-]*)\s*\(", re.MULTILINE)
+# The name may be a scoped npm package (e.g. "@aws-sdk/client-s3"), so allow a leading "@" and
+# "/" within the name (not just Python-style identifiers).
+_ENTRY_RE = re.compile(r"^\s*-\s*(@?[A-Za-z0-9][A-Za-z0-9._/@-]*)\s*\(", re.MULTILINE)
 
 
 def attributed_names(notice_text: str | None) -> set[str]:
