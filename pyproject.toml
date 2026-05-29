@@ -18,6 +18,14 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
+# Tier-1 hosted/agent stack (the user installs this into their OWN GCP project).
+gcp = [
+    "google-genai>=1.0",
+    "google-adk>=1.0",
+    "google-cloud-aiplatform>=1.70",
+    "google-cloud-storage>=2.18",
+    "google-cloud-firestore>=2.16",
+]
 
 [project.urls]
 Homepage = "https://github.com/CarrotGamesStudios/tos-compliance-agent"

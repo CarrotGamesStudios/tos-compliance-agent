@@ -94,3 +94,14 @@ def test_confirm_gate_allows_deterministic():
     # Deterministic (confidence == 1.0) applies without confirm.
     assert needs_confirmation(_synthetic_finding(1.0), confirm=False) is False
 
+
+def test_select_port_valid_and_fallbacks():
+    from compliance_agent.mcp_server import select_port
+
+    assert select_port("9090") == 9090
+    assert select_port(None) == 8080
+    assert select_port("not-a-number") == 8080
+    assert select_port("0") == 8080  # out of range
+    assert select_port("70000") == 8080  # out of range
+    assert select_port("-5") == 8080
+
