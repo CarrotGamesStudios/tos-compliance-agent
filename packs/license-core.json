@@ -1,0 +1,62 @@
+{
+  "id": "license-core",
+  "domain": "license",
+  "provenance": "public",
+  "source_doc": "spdx-license-rules",
+  "source_version": "2026-05-28",
+  "compiled_at": "2026-05-28",
+  "obligations": [
+    {
+      "id": "lic-gpl-incompat",
+      "domain": "license",
+      "source": {
+        "doc": "GPL-3.0",
+        "provenance": "public",
+        "version": "spdx-GPL-3.0",
+        "clause_quote": "You may convey a covered work in object code form ... provided that you also convey ... the corresponding source under the terms of this License.",
+        "url_or_section": "https://www.gnu.org/licenses/gpl-3.0.txt §5-6"
+      },
+      "applies_when": {
+        "all": [
+          {"any": [{"has_dep_license": "GPL-3.0"}, {"has_dep_license": "AGPL-3.0"}]},
+          {"not": {"project_license_in": ["GPL-3.0", "AGPL-3.0"]}}
+        ]
+      },
+      "requirement": "A non-(A)GPL project must not link copyleft (A)GPL-3.0 dependencies; doing so forces the whole work under (A)GPL.",
+      "check": {
+        "kind": "deterministic",
+        "analyzer": "gpl_incompatibility",
+        "params": {"incompatible_licenses": ["GPL-3.0", "AGPL-3.0"]}
+      },
+      "severity": "high",
+      "fix": {
+        "kind": "manual",
+        "guidance": "Replace the copyleft dependency with a permissively-licensed alternative, or relicense the project under (A)GPL-3.0."
+      }
+    },
+    {
+      "id": "lic-apache-notice",
+      "domain": "license",
+      "source": {
+        "doc": "Apache-2.0",
+        "provenance": "public",
+        "version": "spdx-Apache-2.0",
+        "clause_quote": "You must retain, in the Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices ... and ... include a readable copy of the attribution notices contained within ... a NOTICE text file distributed as part of the Derivative Works.",
+        "url_or_section": "https://www.apache.org/licenses/LICENSE-2.0 §4"
+      },
+      "applies_when": {"dep_license_in": ["Apache-2.0"]},
+      "requirement": "Projects bundling Apache-2.0 dependencies must ship a NOTICE file listing each such dependency.",
+      "check": {
+        "kind": "deterministic",
+        "analyzer": "missing_notice",
+        "params": {"attribution_licenses": ["Apache-2.0"]}
+      },
+      "severity": "medium",
+      "fix": {
+        "kind": "auto",
+        "codemod": "add_notice_entries",
+        "guidance": "Create/extend a NOTICE file listing each Apache-2.0 dependency."
+      }
+    }
+  ]
+}

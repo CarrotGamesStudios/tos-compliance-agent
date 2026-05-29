@@ -30,3 +30,10 @@ packs/internal/
 .env
 *.json.key
 service-account*.json
+
+# Advisor/agent CLI scratch dirs (never commit)
+.antigravitycli/
+.agy/
+.gemini/
+.codex/
+.cursor/
