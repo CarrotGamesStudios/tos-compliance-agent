@@ -55,3 +55,29 @@ def test_version_flag(capsys):
         main(["--version"])
     assert exc.value.code == 0
     assert "compliance-agent" in capsys.readouterr().out
+
+
+def test_scan_uses_judge_when_built(tmp_path, capsys, monkeypatch):
+    # --judge builds a judge; here we stub _build_judge to inject a fake so no Gemini key is needed.
+    import compliance_agent.cli as climod
+
+    _write_project(tmp_path, ["ok"])
+
+    class _Judge:
+        def judge(self, obligation, model):
+            from compliance_agent.judge import JudgeVerdict
+
+            return JudgeVerdict(violation=False, confidence=0.9, rationale="clean")
+
+    monkeypatch.setattr(climod, "_build_judge", lambda args: _Judge())
+    code = main(["scan", str(tmp_path), "--judge"], dist_lookup=_Lookup({"ok": (None, [], "MIT")}))
+    assert code == 0  # judge cleared everything; clean project
+
+
+def test_scan_without_judge_builds_none(tmp_path):
+    # No --judge -> _build_judge returns None (no Gemini needed).
+    import argparse
+
+    from compliance_agent.cli import _build_judge
+
+    assert _build_judge(argparse.Namespace(judge=False)) is None

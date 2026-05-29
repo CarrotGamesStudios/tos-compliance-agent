@@ -18,13 +18,38 @@ from .report import to_json, to_markdown
 from .scanners.licenses import build_project_model
 
 
-def _scan(path: str, dist_lookup, as_json: bool) -> tuple[int, list]:
+def _scan(path: str, dist_lookup, as_json: bool, judge=None) -> tuple[int, list]:
     model = build_project_model(path, dist_lookup=dist_lookup)
-    findings = evaluate(model, load_active_packs())
+    findings = evaluate(model, load_active_packs(), judge=judge)
     out = to_json(findings, model) if as_json else to_markdown(findings, model.unscanned)
     print(out)
     violations = [f for f in findings if f.status == "violation"]
     return (1 if violations else 0), findings
+
+
+def _build_judge(args):
+    """Construct a Gemini judge for judgment obligations, or None when --judge is not set.
+
+    Raises ProjectScanError (clean CLI error) if the GCP extra is missing or the Gemini client
+    can't initialize. Per-obligation judge failures during the scan still degrade to needs_review.
+    """
+    if not getattr(args, "judge", False):
+        return None
+    try:
+        from .compiler.genai_client import GenaiModelClient
+        from .judge import GeminiJudge
+
+        client = GenaiModelClient(
+            project=getattr(args, "project", None),
+            location=getattr(args, "location", "us-central1"),
+        )
+    except ImportError as exc:
+        raise ProjectScanError(
+            f"--judge needs the GCP extra — `pip install 'compliance-agent[gcp]'` ({exc})"
+        ) from exc
+    except Exception as exc:
+        raise ProjectScanError(f"--judge: could not initialize the Gemini client: {exc}") from exc
+    return GeminiJudge(client=client)
 
 
 # ── Tier-1 helpers (pure + testable) ──
@@ -131,6 +156,14 @@ def main(argv: Sequence[str] | None = None, dist_lookup=None) -> int:
     p_scan = sub.add_parser("scan", help="scan a project and report findings")
     p_scan.add_argument("path")
     p_scan.add_argument("--json", action="store_true")
+    p_scan.add_argument(
+        "--judge",
+        action="store_true",
+        help="evaluate judgment obligations with Gemini (needs a Gemini/Vertex key; "
+        "GEMINI_API_KEY for AI Studio, or --project for Vertex)",
+    )
+    p_scan.add_argument("--project", default=None, help="GCP project for Vertex (judge)")
+    p_scan.add_argument("--location", default="us-central1")
 
     p_fix = sub.add_parser("fix", help="apply deterministic auto-fixes")
     p_fix.add_argument("path")
@@ -162,7 +195,7 @@ def main(argv: Sequence[str] | None = None, dist_lookup=None) -> int:
 
     try:
         if args.command == "scan":
-            code, _ = _scan(args.path, dist_lookup, args.json)
+            code, _ = _scan(args.path, dist_lookup, args.json, judge=_build_judge(args))
             return code
 
         if args.command == "fix":
