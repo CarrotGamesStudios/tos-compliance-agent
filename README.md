@@ -5,6 +5,8 @@ stack (Vertex AI Agent Engine, ADK, Gemini 3.1, Vertex AI RAG Engine). It watche
 when it **drifts out of compliance**, and either **auto-fixes the violation in place** or **flags
 exactly what a human must fix** — always with a citation to the source clause.
 
+**📹 Demo video:** https://youtu.be/OKi-HwaRFvo — a 2-minute walkthrough scanning a real production app.
+
 > **Single-tenant by design.** This is not a hosted service. You install it into **your own** Google
 > Cloud project, running on **your own** infrastructure and credentials. Confidential internal docs
 > and B2B contracts never leave your project. A fully **local mode** (CLI + MCP) also runs with no

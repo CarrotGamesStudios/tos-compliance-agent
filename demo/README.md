@@ -1,5 +1,7 @@
 # Demo video
 
+**▶ Watch:** https://youtu.be/OKi-HwaRFvo
+
 A ~2:21 narrated walkthrough of the ToS/Compliance Agent, using a real production app
 (VidSeeds) as the subject being scanned.
 
