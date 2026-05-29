@@ -4,8 +4,8 @@ from typing import Any
 
 from .models import ProjectModel
 
-_LIST_OPS = {"dep_license_in", "project_license_in", "uses_import_in"}
-_STR_OPS = {"has_dep_license", "uses_import"}
+_LIST_OPS = {"dep_license_in", "project_license_in", "uses_import_in", "uses_platform_api_in"}
+_STR_OPS = {"has_dep_license", "uses_import", "uses_platform_api"}
 _BOOL_OPS = {"notice_file_present", "has_pii_in_logs"}
 _COMPOUND_OPS = {"all", "any"}
 
@@ -70,5 +70,9 @@ def evaluate_predicate(pred: dict[str, Any], model: ProjectModel) -> bool:
         return value in set(model.imports)
     if op == "uses_import_in":
         return bool(set(model.imports) & set(value))
+    if op == "uses_platform_api":
+        return value in set(model.platform_apis)
+    if op == "uses_platform_api_in":
+        return bool(set(model.platform_apis) & set(value))
 
     raise ValueError(f"unknown predicate op: {op}")  # pragma: no cover - validate_predicate guards

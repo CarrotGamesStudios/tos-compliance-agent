@@ -67,9 +67,11 @@ class ProjectModel(BaseModel):
     dependencies: list[Dependency] = Field(default_factory=list)
     notice_file_present: bool = False
     notice_text: str | None = None
-    # Code-level facts (populated by the Python AST scanner; used by privacy/ai_aup/api_tos).
+    # Code-level facts (populated by the scanners; used by privacy/ai_aup/api_tos).
     pii_log_sites: list[Evidence] = Field(default_factory=list)
     imports: list[str] = Field(default_factory=list)
+    # Third-party platform APIs detected by host pattern in source (youtube, tiktok, meta, ...).
+    platform_apis: list[str] = Field(default_factory=list)
     unscanned: list[dict[str, str]] = Field(default_factory=list)
 
 

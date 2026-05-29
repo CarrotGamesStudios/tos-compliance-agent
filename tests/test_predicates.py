@@ -104,3 +104,15 @@ def test_validate_new_ops():
         validate_predicate({"uses_import": ["not-a-string"]})
     with pytest.raises(ValueError):
         validate_predicate({"has_pii_in_logs": "true"})
+
+
+def test_platform_api_predicates():
+    m = ProjectModel(hash="h", root="/p", platform_apis=["youtube", "tiktok"])
+    assert evaluate_predicate({"uses_platform_api": "youtube"}, m) is True
+    assert evaluate_predicate({"uses_platform_api": "meta"}, m) is False
+    assert evaluate_predicate({"uses_platform_api_in": ["meta", "tiktok"]}, m) is True
+    assert evaluate_predicate({"uses_platform_api_in": ["meta", "x"]}, m) is False
+    validate_predicate({"uses_platform_api": "youtube"})
+    validate_predicate({"uses_platform_api_in": ["youtube", "x"]})
+    with pytest.raises(ValueError):
+        validate_predicate({"uses_platform_api": ["list-not-allowed"]})

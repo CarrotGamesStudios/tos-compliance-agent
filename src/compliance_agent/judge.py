@@ -35,6 +35,7 @@ def _facts_summary(model: ProjectModel) -> str:
         f"project_license: {model.project_license}",
         f"dependencies: {', '.join(sorted(d.name for d in model.dependencies)) or '(none)'}",
         f"imports: {', '.join(model.imports) or '(none)'}",
+        f"platform_apis_detected: {', '.join(model.platform_apis) or '(none)'}",
     ]
     if model.pii_log_sites:
         lines.append("pii_in_logs:")

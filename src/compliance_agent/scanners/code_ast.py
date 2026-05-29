@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import os
 import re
 from pathlib import Path
 
@@ -109,21 +110,22 @@ def scan_python_files(root: str) -> tuple[list[Evidence], list[str], list[dict[s
     imports: set[str] = set()
     unscanned: list[dict[str, str]] = []
 
-    for path in sorted(root_path.rglob("*.py")):
-        rel_path = path.relative_to(root_path)
-        # Check only directory components RELATIVE to the project root, so a project that itself
-        # lives under a dir named e.g. "build"/"env" is not entirely skipped.
-        if any(part in _SKIP_DIRS for part in rel_path.parts[:-1]):
-            continue
-        rel = str(rel_path)
-        try:
-            tree = ast.parse(path.read_text(encoding="utf-8"), filename=rel)
-        except (SyntaxError, UnicodeDecodeError, OSError) as exc:
-            unscanned.append({"file": rel, "reason": f"parse error: {exc}"})
-            continue
-        visitor = _Visitor(rel)
-        visitor.visit(tree)
-        pii_sites.extend(visitor.pii_sites)
-        imports.update(visitor.imports)
+    for dirpath, dirnames, filenames in os.walk(root):
+        # Prune skipped dirs in place so we never descend into node_modules/.venv/etc.
+        dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS]
+        for filename in sorted(filenames):
+            if not filename.endswith(".py"):
+                continue
+            path = Path(dirpath) / filename
+            rel = str(path.relative_to(root_path))
+            try:
+                tree = ast.parse(path.read_text(encoding="utf-8"), filename=rel)
+            except (SyntaxError, UnicodeDecodeError, OSError) as exc:
+                unscanned.append({"file": rel, "reason": f"parse error: {exc}"})
+                continue
+            visitor = _Visitor(rel)
+            visitor.visit(tree)
+            pii_sites.extend(visitor.pii_sites)
+            imports.update(visitor.imports)
 
     return pii_sites, sorted(imports), unscanned

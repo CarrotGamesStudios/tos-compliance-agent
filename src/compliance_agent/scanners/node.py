@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from ..errors import ProjectScanError
 from ..models import Dependency, Evidence, ProjectModel
 from ..safety import ensure_within
 from .code_ast import identifier_pii_hit
+from .platforms import detect_platform_apis
 from .pyproject import normalize_license
 
 _NOTICE_FILES = ("NOTICE", "NOTICE.txt", "NOTICE.md")
@@ -105,33 +107,38 @@ class _NodeModulesLookup:
 def scan_js_pii(root: Path) -> tuple[list[Evidence], list[dict[str, str]]]:
     pii_sites: list[Evidence] = []
     unscanned: list[dict[str, str]] = []
-    for path in sorted(root.rglob("*")):
-        if path.suffix not in _SOURCE_EXTS or not path.is_file():
-            continue
-        rel_path = path.relative_to(root)
-        if any(part in _SKIP_DIRS for part in rel_path.parts[:-1]):
-            continue
-        rel = str(rel_path)
-        try:
-            text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError) as exc:
-            unscanned.append({"file": rel, "reason": f"read error: {exc}"})
-            continue
-        for match in _LOG_OPEN_RE.finditer(text):
-            args = _capture_args(text, match.end())
-            hits = sorted(
-                {
-                    f"{ident} ({hit})"
-                    for ident in _IDENT_RE.findall(args)
-                    if (hit := identifier_pii_hit(ident))
-                }
-            )
-            if hits:
-                line = text.count("\n", 0, match.start()) + 1
-                pii_sites.append(
-                    Evidence(file=rel, line=line, snippet="PII in log call: " + ", ".join(hits))
-                )
+    for dirpath, dirnames, filenames in os.walk(root):
+        # Prune skipped dirs in place so we never descend into node_modules/.next/etc.
+        dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS]
+        for filename in sorted(filenames):
+            path = Path(dirpath) / filename
+            if path.suffix not in _SOURCE_EXTS:
+                continue
+            rel = str(path.relative_to(root))
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError) as exc:
+                unscanned.append({"file": rel, "reason": f"read error: {exc}"})
+                continue
+            _scan_text_for_pii(text, rel, pii_sites)
     return pii_sites, unscanned
+
+
+def _scan_text_for_pii(text: str, rel: str, pii_sites: list[Evidence]) -> None:
+    for match in _LOG_OPEN_RE.finditer(text):
+        args = _capture_args(text, match.end())
+        hits = sorted(
+            {
+                f"{ident} ({hit})"
+                for ident in _IDENT_RE.findall(args)
+                if (hit := identifier_pii_hit(ident))
+            }
+        )
+        if hits:
+            line = text.count("\n", 0, match.start()) + 1
+            pii_sites.append(
+                Evidence(file=rel, line=line, snippet="PII in log call: " + ", ".join(hits))
+            )
 
 
 def build_node_model(project_dir: str, pkg_lookup=None) -> ProjectModel:
@@ -167,6 +174,7 @@ def build_node_model(project_dir: str, pkg_lookup=None) -> ProjectModel:
 
     pii_sites, code_unscanned = scan_js_pii(root)
     unscanned.extend(code_unscanned)
+    platform_apis = detect_platform_apis(str(root))
 
     digest_input = "|".join(
         [project_license or ""]
@@ -174,6 +182,7 @@ def build_node_model(project_dir: str, pkg_lookup=None) -> ProjectModel:
         + [str(notice_text is not None)]
         + sorted(f"{e.file}:{e.line}:{e.snippet}" for e in pii_sites)
         + sorted(dep_names)
+        + sorted(platform_apis)
     )
     model_hash = hashlib.sha256(digest_input.encode()).hexdigest()[:16]
 
@@ -186,5 +195,6 @@ def build_node_model(project_dir: str, pkg_lookup=None) -> ProjectModel:
         notice_text=notice_text,
         pii_log_sites=pii_sites,
         imports=dep_names,
+        platform_apis=platform_apis,
         unscanned=unscanned,
     )

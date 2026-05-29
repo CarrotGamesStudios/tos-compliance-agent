@@ -10,6 +10,12 @@ applies_when is a single-key JSON object using ONLY these operators:
   {"dep_license_in": ["<SPDX-id>", ...]}   # any dependency license is in this list
   {"project_license_in": ["<SPDX-id>", ...]}  # the project's own license is in this list
   {"notice_file_present": true|false}  # whether a NOTICE file exists
+  {"has_pii_in_logs": true|false}      # PII-named fields written to logs were detected
+  {"uses_import": "<module>"}          # the project imports this module/package
+  {"uses_import_in": ["<module>", ...]}    # the project imports any of these
+  {"uses_platform_api": "<platform>"}  # uses this platform's API
+       # platform is one of: youtube|tiktok|meta|linkedin|x|threads
+  {"uses_platform_api_in": ["<platform>", ...]}
 Use canonical SPDX ids (e.g. "GPL-3.0", "AGPL-3.0", "Apache-2.0", "MIT", "BSD-3-Clause").
 """
 
@@ -17,7 +23,9 @@ _ANALYZERS = """
 check.kind is "deterministic" with check.analyzer one of:
   "gpl_incompatibility"  params: {"incompatible_licenses": ["GPL-3.0","AGPL-3.0"]}
   "missing_notice"       params: {"attribution_licenses": ["Apache-2.0"]}
-Use check.kind "judgment" (with a short prompt_template) ONLY when no deterministic analyzer fits.
+  "pii_in_logs"          params: {}   (flags PII-named fields written to logs)
+Use check.kind "judgment" (with a short prompt_template) for obligations that need reasoning over
+the project facts (no deterministic analyzer fits).
 """
 
 

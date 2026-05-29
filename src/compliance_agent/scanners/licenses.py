@@ -9,6 +9,7 @@ from ..errors import ProjectScanError
 from ..models import Dependency, ProjectModel
 from ..safety import resolve_root
 from .code_ast import scan_python_files
+from .platforms import detect_platform_apis
 from .pyproject import (
     _CLASSIFIER_TO_SPDX,
     normalize_license,
@@ -120,9 +121,10 @@ def _build_python_model(root, dist_lookup=None) -> ProjectModel:
 
     notice_text = _read_notice(root)
 
-    # Code-level facts (privacy / ai_aup / api_tos): PII-in-logs + imported modules.
+    # Code-level facts (privacy / ai_aup / api_tos): PII-in-logs + imported modules + platform APIs.
     pii_log_sites, imports, code_unscanned = scan_python_files(str(root))
     unscanned.extend(code_unscanned)
+    platform_apis = detect_platform_apis(str(root))
 
     digest_input = "|".join(
         [project_license or ""]
@@ -130,6 +132,7 @@ def _build_python_model(root, dist_lookup=None) -> ProjectModel:
         + [str(notice_text is not None)]
         + sorted(f"{e.file}:{e.line}:{e.snippet}" for e in pii_log_sites)
         + sorted(imports)
+        + sorted(platform_apis)
     )
     model_hash = hashlib.sha256(digest_input.encode()).hexdigest()[:16]
 
@@ -142,5 +145,6 @@ def _build_python_model(root, dist_lookup=None) -> ProjectModel:
         notice_text=notice_text,
         pii_log_sites=pii_log_sites,
         imports=imports,
+        platform_apis=platform_apis,
         unscanned=unscanned,
     )
