@@ -37,3 +37,9 @@ service-account*.json
 .gemini/
 .codex/
 .cursor/
+
+# Demo build intermediates (regenerable)
+demo/audio/
+demo/silent.mp4
+demo/narration.wav
+demo/*.txt
